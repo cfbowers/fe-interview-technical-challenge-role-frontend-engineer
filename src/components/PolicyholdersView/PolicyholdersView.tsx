@@ -1,8 +1,12 @@
 import React from "react";
 import InfoTable from "../InfoTable";
-import { Box } from "@mui/material";
-import { useQuery } from "react-query";
-import { fetchPolicyHolders, getPolicyHolderRows } from "./helpers";
+import { Box, Button } from "@mui/material";
+import { useQuery, useMutation } from "react-query";
+import {
+  fetchPolicyHolders,
+  getPolicyHolderRows,
+  postPolicyHolder,
+} from "./helpers";
 import { TPolicyHolder } from "./types";
 
 export default function PolicyholdersView() {
@@ -14,6 +18,17 @@ export default function PolicyholdersView() {
     setPolicyHolders(policyHolders);
   });
 
+  const { mutate } = useMutation(
+    "createPolicyHolder",
+    postPolicyHolder,
+    {
+      onSuccess: async (data) => {
+        const { policyHolders } = await data.json()
+        setPolicyHolders(policyHolders)
+      }
+    }
+  );
+
   return (
     <Box sx={{ textAlign: "center" }}>
       {policyHolders &&
@@ -22,9 +37,10 @@ export default function PolicyholdersView() {
             key={`policy-holder-${ph.name}-${ph.age}`}
             sx={{ marginBottom: "16px" }}
           >
-            <InfoTable header="Policy Holders" rows={getPolicyHolderRows(ph)} />
+            <InfoTable header={ph.name} rows={getPolicyHolderRows(ph)} />
           </Box>
         ))}
+      <Button onClick={() => mutate()}>Add Policy Holder</Button>
     </Box>
   );
 }
